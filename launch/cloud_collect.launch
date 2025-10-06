@@ -1,0 +1,7 @@
+<launch>
+    <rosparam file="$(find relocalign)/config/cloud_collect.yaml" command="load"/>
+
+    <node pkg="relocalign" type="cloud_collect" name="cloud_collect" output="screen">
+    </node>
+</launch>
+

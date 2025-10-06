@@ -1,0 +1,12 @@
+<launch>
+    <param name="config_path" value="$(find relocalign)/config/relocalign.yaml" />
+    <param name="is_livox_custom" value="true" />         
+    <param name="cloud_topic" value="/livox/lidar" />    
+    <param name="frame_count" value="10" />               
+    <param name="map_path" value="$(find relocalign)/data/pcd/scans.pcd" /> 
+
+    <node pkg="relocalign" type="reloc_livox" name="reloc_livox" output="screen">
+    </node>
+</launch>
+
+

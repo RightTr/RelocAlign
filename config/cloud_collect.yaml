@@ -1,5 +1,5 @@
-cloud_topic:
+cloud_topic: "/livox/lidar"
 
-is_livox_custom:
+is_livox_custom: false
 
-pcd_path:
+pcd_path: "/home/right/workspace/LIO-Relocalization/src/Relocalign/data/pcd/cloud_2.pcd"

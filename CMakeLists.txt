@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(relocalign)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
 set(RELOCALIGN_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -9,6 +11,9 @@ option(BUILD_VGICP_CUDA "Build GPU-powered VGICP" OFF)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   roscpp
+  sensor_msgs
+  # message_runtime
+  # pcl_conversions
 )
 
 
@@ -25,7 +30,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  # ${EIGEN3_INCLUDE_DIR} # Do not add these, please use target target_include_directories() !
+  # ${EIGEN3_INCLUDE_DIR} # Do not add these, please use target_include_directories() !
   # ${PCL_INCLUDE_DIRS}
 )
 
@@ -47,20 +52,39 @@ if(BUILD_VGICP_CUDA)
   add_definitions(-DUSE_VGICP_CUDA)
 endif()
 
-add_executable(reloc_icp src/reloc_icp.cpp src/relocalign.cpp)
-target_link_libraries(reloc_icp 
+add_executable(reloc_livox src/reloc_livox.cpp src/relocalign.cpp)
+target_include_directories(reloc_livox
+  PRIVATE
+    ${CATKIN_DEVEL_PREFIX}/include
+    ${PCL_INCLUDE_DIRS}
+  )
+target_link_libraries(reloc_livox 
+  PRIVATE
+    ${catkin_LIBRARIES}
+    fast_gicp
+    yaml-cpp
+    ${CATKIN_DEVEL_PREFIX}/lib
+    ${PCL_LIBRARIES}
+  )
+
+add_executable(demo_reloc src/demo_reloc.cpp src/relocalign.cpp)
+add_dependencies(demo_reloc fast_gicp)
+target_link_libraries(demo_reloc 
   PRIVATE
     ${catkin_LIBRARIES}
     fast_gicp
     yaml-cpp
   )
 
-add_executable(demo_icp src/demo_icp.cpp src/relocalign.cpp)
-add_dependencies(demo_icp fast_gicp)
-target_link_libraries(demo_icp 
+add_executable(cloud_collect src/cloud_collect.cpp)
+target_include_directories(cloud_collect
   PRIVATE
-    fast_gicp
-    yaml-cpp
+    ${PCL_INCLUDE_DIRS}
+  )
+target_link_libraries(cloud_collect 
+  PRIVATE
+    ${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
   )
 
 

@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <yaml-cpp/yaml.h>
-// #include <filesystem> 
+#include <filesystem> 
 
 enum class AlignMethod 
 {
@@ -155,11 +155,11 @@ struct RelocAlignConfig
     RelocAlignConfig(const std::string& config_file)
     {
         std::cout << "[RelocAlignConfig INFO] config_file: " << config_file << std::endl;
-        // if(!std::filesystem::exists(config_file))
-        // {
-        //     std::cout << "[RelocAlignConfig Error] config_file: " << config_file << " doesn't exist" << std::endl;
-        //     return;
-        // }
+        if(!std::filesystem::exists(config_file))
+        {
+            std::cout << "[RelocAlignConfig Error] config_file: " << config_file << " doesn't exist" << std::endl;
+            return;
+        }
         YAML::Node file_node = YAML::LoadFile(config_file);
         align_method = file_node["align_method"].as<std::string>();
         voxelgrid_leaf = file_node["voxelgrid_leaf"].as<float>();

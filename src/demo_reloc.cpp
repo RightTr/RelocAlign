@@ -2,12 +2,13 @@
 #include "read_configs.hpp"
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <ros/ros.h>
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     if (argc < 4) 
     {  
-        std::cerr << "Please input two arguements ......\n" << std::endl;
+        std::cerr << "Please input three arguements ......\n" << std::endl;
         return -1;
     }
     std::string config_path = argv[1];

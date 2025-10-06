@@ -7,7 +7,7 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "manual_reloc_pub");
     ros::NodeHandle nh;
 
-    ros::Publisher pub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("reloc/manual", 10);
+    ros::Publisher pub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("reloc/manual", 1);
 
     double x = 0.0, y = 0.0, z = 0.0;
     double qx = 0.0, qy = 0.0, qz = 0.0, qw = 0.0;

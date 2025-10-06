@@ -1,5 +1,5 @@
-#ifndef GICP_HPP_
-#define GICP_HPP_
+#ifndef RELOCALIGN_HPP_
+#define RELOCALIGN_HPP_
 
 #include "read_configs.hpp"
 
@@ -20,6 +20,7 @@
 class RelocAlign
 {
   public:
+    RelocAlign() {};
     RelocAlign(const RelocAlignConfig& config);
 
     void SourceCloudInput(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input_cloud)

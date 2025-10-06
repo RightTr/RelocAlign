@@ -1,4 +1,4 @@
-align_method: "VGICPCUDA"
+align_method: "NDTCUDA"
 voxelgrid_leaf: 0.1
 
 pcl_icp:
@@ -22,19 +22,19 @@ gicp:
 vgicp:
   k_correspondences: 20
   voxel_resolution: 1.0
-  neighbor_search_method: "DIRECT1" # DIRECT1 DIRECT7 DIRECT27 DIRECT_RADIUS
+  neighbor_search_method: "DIRECT1" # DIRECT1 DIRECT7 DIRECT27
   num_threads: 8
 
 vgicp_cuda:
   k_correspondences: 20
   voxel_resolution: 1.0
-  neighbor_search_method: "DIRECT1"
+  neighbor_search_method: "DIRECT1" # DIRECT1 DIRECT7 DIRECT27 DIRECT_RADIUS
   neighbor_search_radius: 1.5
-  nearest_neighbor_method: "CPU_PARALLEL_KDTREE" # CPU_PARALLEL_KDTREE, GPU_BRUTEFORCE, GPU_RBF_KERNEL
+  nearest_neighbor_method: "GPU_RBF_KERNEL" # CPU_PARALLEL_KDTREE, GPU_BRUTEFORCE, GPU_RBF_KERNEL
   kernel_width: 0.5
 
 ndt_cuda:
   voxel_resolution: 1.0
-  neighbor_search_method: "DIRECT1"
+  neighbor_search_method: "DIRECT1" # DIRECT1 DIRECT7 DIRECT27 DIRECT_RADIUS
   neighbor_search_radius: 1.5
-  ndt_distance_mode: "P2D"
+  ndt_distance_mode: "D2D"
