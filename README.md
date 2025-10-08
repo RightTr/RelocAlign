@@ -35,3 +35,27 @@ catkin_make
 
 catkin_make -DBUILD_VGICP_CUDA=ON
 ```
+
+## Run
+
+* Manual Reloc
+
+```shell
+rosrun relocalign reloc_manual_xyzquat <x> <y> <z> <qx> <qy> <qz> <qw>
+
+rosrun relocalign reloc_manual_xyzyaw <x> <y> <z> <yaw>
+```
+
+* Cloud Alignment Test
+  
+```shell
+rosrun relocalign demo_reloc <config> <sourece_pcd> <target_pcd>
+
+# config: config/demo_relocalign.yaml
+```
+
+* Reloc_Livox
+
+```shell
+roslaunch relocalign reloc_livox.launch
+```
