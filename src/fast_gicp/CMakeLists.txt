@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(fast_gicp)
 
 set(CMAKE_BUILD_TYPE "Release")
+set(FAST_GICP_ENABLE_CUDA OFF)
 
 find_package(OpenMP)
 if (OPENMP_FOUND)
@@ -10,10 +11,17 @@ if (OPENMP_FOUND)
 endif()
 
 if(BUILD_VGICP_CUDA)
-  find_package(CUDA REQUIRED)
-  include_directories(${CUDA_INCLUDE_DIRS})
-  link_directories(${CUDA_LIBRARY_DIRS})
+  find_package(CUDA QUIET)
+  if(CUDA_FOUND)
+    set(FAST_GICP_ENABLE_CUDA ON)
+    include_directories(${CUDA_INCLUDE_DIRS})
+    link_directories(${CUDA_LIBRARY_DIRS})
+  else()
+    message(WARNING "BUILD_VGICP_CUDA=ON but CUDA toolkit was not found. Building CPU-only fast_gicp.")
+  endif()
 endif()
+
+set(FAST_GICP_ENABLE_CUDA ${FAST_GICP_ENABLE_CUDA} PARENT_SCOPE)
 
 
 add_library(fast_gicp SHARED
@@ -37,7 +45,7 @@ target_include_directories(fast_gicp PUBLIC
 )
 
 ### CUDA ###
-if(BUILD_VGICP_CUDA)
+if(FAST_GICP_ENABLE_CUDA)
   set(CUDA_NVCC_FLAGS "--expt-relaxed-constexpr")
   add_definitions(-DUSE_VGICP_CUDA)
 

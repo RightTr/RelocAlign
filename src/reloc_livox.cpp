@@ -1,11 +1,8 @@
-#include <ros/ros.h>
+#include "ros_utils.hpp"
 #include "relocalign.hpp"
 #include "read_configs.hpp"
 #include <pcl/point_types.h>
-#include <livox_ros_driver2/CustomMsg.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr accumulated_cloud(new pcl::PointCloud<pcl::PointXYZ>());
 pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud(new pcl::PointCloud<pcl::PointXYZ>());
@@ -17,28 +14,27 @@ std::string cloud_topic;
 std::string config_path;
 std::string map_path;
 
-ros::Subscriber sub_livox;
-ros::Publisher pub_reloc;
+ros_utils::Subscriber<ros_utils::PointCloud2Msg> sub_livox;
+ros_utils::Publisher<ros_utils::PoseWithCovarianceStampedMsg> pub_reloc;
 
-void LivoxCallbackCustom(const livox_ros_driver2::CustomMsg::ConstPtr& msg);
-void LivoxCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg);
+void LivoxCallbackCustom(const ros_utils::LivoxCustomMsgConstPtr &msg);
+void LivoxCallback(const ros_utils::PointCloud2MsgConstPtr &cloud_msg);
 void PublishPose(const Eigen::Vector3d& t, const Eigen::Quaterniond& q);
 
 int main(int argc, char * argv[])
 {
-    ros::init(argc, argv, "relocalign_pub");
-    ros::NodeHandle nh;
+    ros_utils::init(argc, argv, "relocalign_pub");
 
-    ros::param::get("config_path", config_path);
-    ros::param::get("is_livox_custom", is_livox_custom);
-    ros::param::get("cloud_topic", cloud_topic);
-    ros::param::get("frame_count", frame_count);
-    ros::param::get("map_path", map_path);
+    ros_utils::get_param("config_path", config_path, std::string{});
+    ros_utils::get_param("is_livox_custom", is_livox_custom, false);
+    ros_utils::get_param("cloud_topic", cloud_topic, std::string{});
+    ros_utils::get_param("frame_count", frame_count, 1);
+    ros_utils::get_param("map_path", map_path, std::string{});
 
     RelocAlignConfig relocalignconfig(config_path);
     relocalign = RelocAlign(relocalignconfig);
 
-    pub_reloc = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("reloc/cloud_align", 10);
+    pub_reloc = ros_utils::advertise<ros_utils::PoseWithCovarianceStampedMsg>("reloc/cloud_align", 10);
 
     if(pcl::io::loadPCDFile<pcl::PointXYZ>(map_path, *map_cloud) == -1){
         std::cout << "[RelocAlign] Couldn't read map file ......\n" << std::endl;
@@ -48,16 +44,13 @@ int main(int argc, char * argv[])
     }
     
     if(is_livox_custom){
-        sub_livox = nh.subscribe<livox_ros_driver2::CustomMsg>(cloud_topic, 10, LivoxCallbackCustom);
+        sub_livox = ros_utils::subscribe<ros_utils::LivoxCustomMsg>(cloud_topic, 10, LivoxCallbackCustom);
     }else{
-        sub_livox = nh.subscribe<sensor_msgs::PointCloud2>(cloud_topic, 10, LivoxCallback);
+        sub_livox = ros_utils::subscribe<ros_utils::PointCloud2Msg>(cloud_topic, 10, LivoxCallback);
     }
 
-    ros::AsyncSpinner spinner(1);
-    spinner.start();
-
-    ros::Rate rate(10);
-    while(ros::ok()){
+    while(ros_utils::ok()){
+        ros_utils::spin_once();
         if(count == frame_count-1){
             pcl::PointCloud<pcl::PointXYZ>::Ptr source_cloud(new pcl::PointCloud<pcl::PointXYZ>());
             pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud(new pcl::PointCloud<pcl::PointXYZ>());
@@ -101,6 +94,7 @@ int main(int argc, char * argv[])
             count = 0;
             accumulated_cloud->clear();
         }
+        ros_utils::sleep(0.1);
     }
     return 0;
 }
@@ -130,9 +124,9 @@ void AccumulateCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input_cloud){
 }
 
 void PublishPose(const Eigen::Vector3d& t, const Eigen::Quaterniond& q){
-    geometry_msgs::PoseWithCovarianceStamped msg;
+    ros_utils::PoseWithCovarianceStampedMsg msg;
 
-    msg.header.stamp = ros::Time::now();
+    msg.header.stamp = ros_utils::now();
     msg.header.frame_id = "map";
 
     msg.pose.pose.position.x = t.x();
@@ -144,10 +138,10 @@ void PublishPose(const Eigen::Vector3d& t, const Eigen::Quaterniond& q){
     msg.pose.pose.orientation.z = q.z();
     msg.pose.pose.orientation.w = q.w();
 
-    pub_reloc.publish(msg);
+    ros_utils::publish(pub_reloc, msg);
 }
 
-void LivoxCallbackCustom(const livox_ros_driver2::CustomMsg::ConstPtr& msg){
+void LivoxCallbackCustom(const ros_utils::LivoxCustomMsgConstPtr &msg){
     pcl::PointCloud<pcl::PointXYZ>::Ptr current_cloud(new pcl::PointCloud<pcl::PointXYZ>());
     for(auto& p : msg->points)
     {
@@ -160,7 +154,7 @@ void LivoxCallbackCustom(const livox_ros_driver2::CustomMsg::ConstPtr& msg){
     AccumulateCloud(current_cloud);
 }
 
-void LivoxCallback(const sensor_msgs::PointCloud2ConstPtr& msg){
+void LivoxCallback(const ros_utils::PointCloud2MsgConstPtr &msg){
     pcl::PointCloud<pcl::PointXYZ>::Ptr current_cloud(new pcl::PointCloud<pcl::PointXYZ>());
     pcl::fromROSMsg(*msg, *current_cloud);
     AccumulateCloud(current_cloud);

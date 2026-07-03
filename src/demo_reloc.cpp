@@ -2,7 +2,6 @@
 #include "read_configs.hpp"
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
-#include <ros/ros.h>
 
 int main(int argc, char *argv[])
 {
